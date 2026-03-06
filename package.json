@@ -12,7 +12,8 @@
 		"lint": "turbo lint",
 		"format": "turbo format",
 		"check": "turbo check",
-		"check:types": "turbo check:types"
+		"check:types": "turbo check:types",
+		"prepare": "git config core.hooksPath .githooks"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
