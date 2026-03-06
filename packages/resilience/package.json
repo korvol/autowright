@@ -1,12 +1,32 @@
 {
 	"name": "@autowright/resilience",
 	"version": "0.0.1",
+	"description": "Resilient execution runner for Playwright scripts — retry, fail, abort with event hooks",
 	"license": "Apache-2.0",
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": ["dist"],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/korvol/autowright.git",
+		"directory": "packages/resilience"
+	},
+	"homepage": "https://github.com/korvol/autowright/tree/main/packages/resilience",
+	"bugs": "https://github.com/korvol/autowright/issues",
+	"keywords": ["playwright", "resilience", "retry", "automation", "scraping"],
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"build": "tsc",
+		"prepublishOnly": "rm -rf dist && tsc",
 		"test": "vitest",
 		"test:ci": "vitest run",
 		"lint": "biome lint .",
