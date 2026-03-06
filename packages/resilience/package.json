@@ -1,0 +1,17 @@
+{
+	"name": "@autowright/resilience",
+	"version": "0.0.1",
+	"license": "Apache-2.0",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"test": "vitest",
+		"test:ci": "vitest run",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check .",
+		"check:types": "tsc --noEmit"
+	}
+}
