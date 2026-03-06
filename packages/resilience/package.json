@@ -12,7 +12,7 @@
 			"import": "./dist/index.js"
 		}
 	},
-	"files": ["dist"],
+	"files": ["dist", "README.md"],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/korvol/autowright.git",
@@ -26,7 +26,7 @@
 	},
 	"scripts": {
 		"build": "tsc",
-		"prepublishOnly": "rm -rf dist && tsc",
+		"prepublishOnly": "rm -rf dist && tsc -p tsconfig.json",
 		"test": "vitest",
 		"test:ci": "vitest run",
 		"lint": "biome lint .",
