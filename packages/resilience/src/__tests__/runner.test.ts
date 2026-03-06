@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { createRunner } from "../runner";
-import type { Action, RunnerConfig, StepContext } from "../types";
+import { createRunner } from "../runner.js";
+import type { Action, RunnerConfig, StepContext } from "../types.js";
 
 function makeCtx(page = {}): StepContext {
 	return { page, data: new Map() };
@@ -107,6 +107,7 @@ describe("Runner", () => {
 
 		expect(result.status).toBe("completed");
 		expect(result.steps[0].status).toBe("success");
+		expect(callCount).toBe(3);
 		expect(onRetry).toHaveBeenCalledTimes(2);
 	});
 
@@ -166,7 +167,7 @@ describe("Runner", () => {
 		const runner = createRunner(
 			makeConfig({
 				onError: () => ({ action: "retry", maxRetries: 3, backoffMs: 1 }),
-				onRetry: (_desc, attempt) => attempts.push(attempt),
+				onRetry: (_desc: string, attempt: number) => attempts.push(attempt),
 			}),
 		);
 
@@ -289,7 +290,11 @@ describe("Runner", () => {
 		const result = await runner.run(makeCtx());
 
 		expect(result.status).toBe("aborted");
-		expect(result.steps.map((s) => s.status)).toEqual(["success", "failed", "skipped"]);
+		expect(result.steps.map((s: { status: string }) => s.status)).toEqual([
+			"success",
+			"failed",
+			"skipped",
+		]);
 	});
 
 	// 13. Step-level onRetry overrides runner
@@ -338,7 +343,7 @@ describe("Runner", () => {
 				callCount++;
 				if (callCount < 2) throw new Error("fail");
 			},
-			onRetry: (attempt, _ctx, defaultHandler) => {
+			onRetry: (attempt: number, _ctx: StepContext, defaultHandler: (a: number) => void) => {
 				defaultHandler(attempt);
 			},
 		});
@@ -418,7 +423,7 @@ describe("Runner", () => {
 			fn: async () => {
 				throw new Error("fail");
 			},
-			onStepFail: (error, _ctx, defaultHandler) => {
+			onStepFail: (error: Error, _ctx: StepContext, defaultHandler: (e: Error) => void) => {
 				defaultHandler(error);
 			},
 		});
@@ -470,7 +475,7 @@ describe("Runner", () => {
 			fn: async () => {
 				throw new Error("fatal");
 			},
-			onAbort: (error, _ctx, defaultHandler) => {
+			onAbort: (error: Error, _ctx: StepContext, defaultHandler: (e: Error) => void) => {
 				defaultHandler(error);
 			},
 		});
@@ -513,7 +518,7 @@ describe("Runner", () => {
 
 		runner.step({
 			description: "ctx step",
-			fn: async (c) => {
+			fn: async (c: StepContext) => {
 				receivedCtx = c;
 			},
 		});
@@ -532,13 +537,13 @@ describe("Runner", () => {
 		runner
 			.step({
 				description: "set data",
-				fn: async ({ data }) => {
+				fn: async ({ data }: StepContext) => {
 					data.set("key", "value");
 				},
 			})
 			.step({
 				description: "read data",
-				fn: async ({ data }) => {
+				fn: async ({ data }: StepContext) => {
 					step2Value = data.get("key");
 				},
 			});
@@ -553,9 +558,9 @@ describe("Runner", () => {
 		let receivedCtx: StepContext | undefined;
 		const runner = createRunner(
 			makeConfig({
-				onError: (_error, ctx) => {
+				onError: (_error: Error, ctx: StepContext) => {
 					receivedCtx = ctx;
-					return { action: "fail" };
+					return { action: "fail" as const };
 				},
 			}),
 		);
@@ -581,7 +586,7 @@ describe("Runner", () => {
 		const runner = createRunner(
 			makeConfig({
 				onError: () => ({ action: "retry", maxRetries: 1, backoffMs: 1 }),
-				onRetry: (_desc, _attempt, ctx) => {
+				onRetry: (_desc: string, _attempt: number, ctx: StepContext) => {
 					receivedCtx = ctx;
 				},
 			}),
@@ -620,7 +625,7 @@ describe("Runner", () => {
 			fn: async () => {
 				throw new Error("fatal");
 			},
-			onAbort: (_error, c) => {
+			onAbort: (_error: Error, c: StepContext) => {
 				receivedCtx = c;
 			},
 		});
@@ -639,7 +644,7 @@ describe("Runner", () => {
 		const runner = createRunner(
 			makeConfig({
 				onError: () => ({ action: "abort" }),
-				onAbort: (_desc, _error, ctx) => {
+				onAbort: (_desc: string, _error: Error, ctx: StepContext) => {
 					runnerSawValue = ctx.data.get("abortReason");
 				},
 			}),
@@ -650,7 +655,7 @@ describe("Runner", () => {
 			fn: async () => {
 				throw new Error("fatal");
 			},
-			onAbort: (_error, ctx, defaultHandler) => {
+			onAbort: (_error: Error, ctx: StepContext, defaultHandler: (e: Error) => void) => {
 				ctx.data.set("abortReason", "credentials_expired");
 				defaultHandler(_error);
 			},
