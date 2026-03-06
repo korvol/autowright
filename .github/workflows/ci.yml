@@ -23,7 +23,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: turbo check:types
+        run: pnpm check:types
 
       - name: Lint
-        run: turbo check
+        run: pnpm check
